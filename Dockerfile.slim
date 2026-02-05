@@ -1,7 +1,7 @@
 # syntax=docker/dockerfile:1
 
 # Build stage
-FROM python:3.14 AS builder
+FROM python:3.14-slim AS builder
 
 ENV PYTHONDONTWRITEBYTECODE=1 \
     PYTHONUNBUFFERED=1 \
@@ -19,7 +19,7 @@ COPY pyproject.toml poetry.lock* ./
 RUN poetry install --no-root --only main --no-ansi
 
 # Final stage
-FROM python:3.14
+FROM python:3.14-slim
 
 LABEL io.modelcontextprotocol.server.name="io.github.vulnersCom/vulners-mcp"
 ENV FASTMCP_HOST=0.0.0.0

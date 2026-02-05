@@ -63,12 +63,13 @@ async def _get_client() -> VulnersClient:
 # -------------------- Tools (no ctx param; headers auto-forwarded) --------------------
 #
 # 🚨 CRITICAL TOOL SELECTION RULES FOR MODELS 🚨
-#
+# ⚠️ VIOLATION CAUSES CONTEXT OVERFLOW AND EXECUTION FAILURE ⚠️
+
 # WHEN TO USE EACH TOOL:
-# 
+#
 # bulletin_by_id: Use when you have SPECIFIC IDs
 # ✅ "Analyze CVE-2025-7775" → bulletin_by_id
-# ✅ "Look up CTX694938" → bulletin_by_id  
+# ✅ "Look up CTX694938" → bulletin_by_id
 # ✅ "Tell me about CVE-2021-44228" → bulletin_by_id
 # ✅ Any specific CVE, RHSA, MS, CTX, NCSC, THN, etc. ID
 #
@@ -77,9 +78,13 @@ async def _get_client() -> VulnersClient:
 # ✅ "Show me recent CVEs" → search_lucene
 # ✅ "What vulnerabilities exist in Chrome?" → search_lucene
 # ❌ NEVER use for known IDs - use bulletin_by_id instead
+# ❌ NEVER use search_lucene with queries like "CVE-2025-7775" - THIS CAUSES 400+ TOKEN CONTEXT OVERFLOW
 #
 # EFFICIENCY RULE: One bulletin_by_id call is sufficient for known IDs.
 # Do NOT follow up with search_lucene unless explicitly asked to broaden scope.
+#
+# 🚨 REDUNDANCY WARNING: If another agent already retrieved data with bulletin_by_id,
+# do NOT make redundant calls - analyze the shared data instead.
 #
 @mcp.tool(
     name="bulletin_by_id",
@@ -213,7 +218,7 @@ async def bulletin_by_id(
 
 @mcp.tool(
     name="search_lucene",
-    description="🔍 DISCOVERY TOOL FOR UNKNOWN VULNERABILITIES 🔍 Full-text search in Vulners Knowledge Base using Lucene syntax. Use ONLY when you don't have specific IDs or version information. NEVER use for known CVE/bulletin IDs - use bulletin_by_id instead. NEVER use for specific software versions (e.g., 'Chrome 138.0.7204.184') - use audit_software instead. 🚨 CRITICAL: For vendor/product searches, ALWAYS use cnaAffected.vendor and cnaAffected.product fields - the affectedSoftware field does NOT exist."
+    description="🔍 DISCOVERY TOOL FOR UNKNOWN VULNERABILITIES 🔍 Full-text search in Vulners Knowledge Base using Lucene syntax. Use ONLY when you don't have specific IDs or version information. 🚨 CRITICAL: NEVER use for known CVE/bulletin IDs - use bulletin_by_id instead. 🚨 NEVER use search_lucene with queries like 'CVE-2025-7775' - THIS CAUSES 400+ TOKEN CONTEXT OVERFLOW AND EXECUTION FAILURE. NEVER use for specific software versions (e.g., 'Chrome 138.0.7204.184') - use audit_software instead. For vendor/product searches, ALWAYS use cnaAffected.vendor and cnaAffected.product fields - the affectedSoftware field does NOT exist."
 )
 async def search_lucene(
     query: Annotated[str, "Lucene query string for searching vulnerabilities. Supports Boolean operators (AND, OR, NOT), field-specific queries, range searches, and wildcard matching. NEVER use for specific software versions - use audit_software instead. For vendor/product searches use cnaAffected.vendor and cnaAffected.product (NOT affectedSoftware which does not exist)."], 
@@ -234,6 +239,7 @@ async def search_lucene(
       
     ❌ **DON'T USE FOR:**
       ❌ Known CVE IDs → Use bulletin_by_id instead
+      ❌ NEVER use search_lucene with queries like "CVE-2025-7775" → THIS CAUSES 400+ TOKEN CONTEXT OVERFLOW
       ❌ CPE strings or vendor + product + version → Use audit_software instead
       ❌ Specific software versions (e.g., "Chrome 138.0.7204.184") → Use audit_software instead
 

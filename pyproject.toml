@@ -7,14 +7,13 @@ authors = [{name = "Vulners Team", email = "dev@vulners.com"}]
 keywords = ["MCP", "security", "network", "vulners", "vulnerability", "CVE"]
 requires-python = ">=3.13,<4.0"
 dependencies = [
-    "mcp[cli] (>=1.9.0,<2.0)",
+    "mcp[cli] (>=1.20.0,<1.23)",
     "httpx (>=0.28.1,<0.29.0)",
-    "pydantic (>=2.10,<3.0)",
-    "pydantic-ai (==0.0.13)",
-    "starlette (==0.39.2)",
-    "uvicorn (==0.30.6)",
-    "fastmcp (>=2.12.3,<3.0.0)",
-    "pydantic-settings (>=2.11.0,<3.0.0)",
+    "pydantic (>=2.12.5,<3.0)",
+    "starlette (>=0.50.0,<0.51.0)",
+    "uvicorn (>=0.38.0,<0.39.0)",
+    "fastmcp (>=2.13.3,<3.0.0)",
+    "pydantic-settings (>=2.12.0,<3.0.0)",
 ]
 
 
@@ -23,5 +22,5 @@ requires = ["poetry-core>=2.0.0,<3.0.0"]
 build-backend = "poetry.core.masonry.api"
 
 [tool.poetry.group.dev.dependencies]
-ruff = "^0.13.2"
+ruff = "^0.14.8"
 
